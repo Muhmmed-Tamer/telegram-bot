@@ -184,7 +184,7 @@
     const btnSpinner = document.getElementById('btnSpinner');
     const btnText = document.getElementById('btnText');
 
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function(e) {
       e.preventDefault();
 
       submitBtn.disabled = true;
@@ -203,30 +203,24 @@
         Action: document.getElementById('Action').value
       };
 
-      
-      const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-      const success = navigator.sendBeacon(N8N_WEBHOOK_URL, blob);
+      try {
+        await fetch(N8N_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
 
-      if (success) {
         tg.HapticFeedback?.notificationOccurred('success');
         tg.close();
-      } else {
-        
-        fetch(N8N_WEBHOOK_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify(payload)
-        }).then(() => {
-          tg.HapticFeedback?.notificationOccurred('success');
-          tg.close();
-        }).catch(() => {
-          tg.HapticFeedback?.notificationOccurred('error');
-          alert('حدث خطأ أثناء الإرسال!');
-          submitBtn.disabled = false;
-          btnSpinner.style.display = 'none';
-          btnText.innerText = 'إرسال التاسك ✅';
-        });
+      } catch (err) {
+        console.error(err);
+        tg.HapticFeedback?.notificationOccurred('error');
+        alert('حدث خطأ أثناء الإرسال!');
+        submitBtn.disabled = false;
+        btnSpinner.style.display = 'none';
+        btnText.innerText = 'إرسال التاسك ✅';
       }
     });
   </script>
