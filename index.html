@@ -102,7 +102,6 @@
       transform: none;
     }
 
-    /* Spinner Animation */
     .spinner {
       display: none;
       width: 18px;
@@ -129,37 +128,42 @@
   <form id="taskForm">
     <div class="form-group">
       <label>Sales Name</label>
-      <input type="text" id="sales_name" placeholder="أدخل اسم المبيعات" required>
+      <input type="text" id="SalesName" placeholder="أدخل اسم المبيعات" required>
     </div>
     
     <div class="form-group">
       <label>Client Name</label>
-      <input type="text" id="client_name" placeholder="أدخل اسم العميل" required>
+      <input type="text" id="ClienName" placeholder="أدخل اسم العميل" required>
     </div>
     
     <div class="form-group">
       <label>Project Name</label>
-      <input type="text" id="project_name" placeholder="اسم المشروع" required>
+      <input type="text" id="ProjectName" placeholder="اسم المشروع" required>
     </div>
     
     <div class="form-group">
       <label>Visit Number</label>
-      <input type="number" id="visit_number" placeholder="رقم الزيارة" required>
+      <input type="number" id="VisitNumber" placeholder="رقم الزيارة" required>
     </div>
     
     <div class="form-group">
-      <label>Reason for Visit</label>
-      <input type="text" id="reason" placeholder="سبب الزيارة" required>
+      <label>Reason For Visit</label>
+      <input type="text" id="ReasonForVisit" placeholder="سبب الزيارة" required>
     </div>
     
     <div class="form-group">
-      <label>Channel & Name</label>
-      <input type="text" id="channel" placeholder="القناة والاسم" required>
+      <label>Channel</label>
+      <input type="text" id="Channel" placeholder="القناة" required>
+    </div>
+
+    <div class="form-group">
+      <label>Name</label>
+      <input type="text" id="Name" placeholder="الاسم" required>
     </div>
     
     <div class="form-group">
       <label>Action</label>
-      <input type="text" id="action" placeholder="الإجراء المطلوب" required>
+      <input type="text" id="Action" placeholder="الإجراء المطلوب" required>
     </div>
 
     <button type="submit" id="submitBtn">
@@ -173,7 +177,6 @@
     tg.ready();
     tg.expand();
 
-    // رابط الـ Production الخاص بك
     const N8N_WEBHOOK_URL = 'https://botelegram.app.n8n.cloud/webhook/add-task';
 
     const form = document.getElementById('taskForm');
@@ -184,24 +187,24 @@
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
 
-      // 1. منع الإرسال المتكرر وتعطيل الزر
       submitBtn.disabled = true;
       btnSpinner.style.display = 'inline-block';
       btnText.innerText = 'جاري الإرسال...';
 
+      // مفاتيح الـ JSON هي نفسها بالضبط أسماء رؤوس الأعمدة في Google Sheets
       const payload = {
         chat_id: tg.initDataUnsafe?.user?.id,
-        sales_name: document.getElementById('sales_name').value,
-        client_name: document.getElementById('client_name').value,
-        project_name: document.getElementById('project_name').value,
-        visit_number: document.getElementById('visit_number').value,
-        reason: document.getElementById('reason').value,
-        channel: document.getElementById('channel').value,
-        action: document.getElementById('action').value
+        SalesName: document.getElementById('SalesName').value,
+        ClienName: document.getElementById('ClientName').value,
+        ProjectName: document.getElementById('ProjectName').value,
+        VisitNumber: document.getElementById('VisitNumber').value,
+        ReasonForVisit: document.getElementById('ReasonForVisit').value,
+        Channel: document.getElementById('Channel').value,
+        Name: document.getElementById('Name').value,
+        Action: document.getElementById('Action').value
       };
 
       try {
-        // 2. إرسال البيانات لـ n8n
         const response = await fetch(N8N_WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -209,14 +212,12 @@
         });
 
         if (response.ok) {
-          // إشعار نجاح أصلي داخل تليجرام وإغلاق الواجهة
           tg.HapticFeedback?.notificationOccurred('success');
           tg.close();
         } else {
           throw new Error('Server error');
         }
       } catch (error) {
-        // إعادة التفعيل في حالة حدوث مشكلة شبكة
         tg.HapticFeedback?.notificationOccurred('error');
         alert('حدث خطأ أثناء الإرسال! يرجى المحاولة مرة أخرى.');
         
