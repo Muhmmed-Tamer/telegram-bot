@@ -188,10 +188,10 @@
       const btnSpinner = document.getElementById('btnSpinner');
       const btnText = document.getElementById('btnText');
 
-      form.addEventListener('submit', async function(e) {
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // Lock UI
+        // Prevent double submission UI state
         submitBtn.disabled = true;
         btnSpinner.style.display = 'inline-block';
         btnText.innerText = 'جاري الإرسال...';
@@ -208,50 +208,52 @@
           Action: document.getElementById('Action').value.trim()
         };
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout safety
+        const executeSubmission = async () => {
+          try {
+            // Using standard fetch with keepalive to prevent lifecycle cancellation on window close
+            const res = await fetch(N8N_WEBHOOK_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+              keepalive: true
+            });
 
-        try {
-          const response = await fetch(N8N_WEBHOOK_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload),
-            signal: controller.signal
-          });
+            if (!res.ok) {
+              throw new Error(`HTTP Error: ${res.status}`);
+            }
 
-          clearTimeout(timeoutId);
+            // Success feedback
+            tg?.HapticFeedback?.notificationOccurred('success');
+            btnSpinner.style.display = 'none';
+            btnText.innerText = 'تم الإرسال بنجاح! ✅';
+            submitBtn.style.backgroundColor = '#2ecc71';
 
-          if (!response.ok) {
-            throw new Error(`Server returned status code ${response.status}`);
-          }
+            // Brief delay to allow feedback animation before closing window
+            setTimeout(() => {
+              if (tg) {
+                tg.close();
+              } else {
+                form.reset();
+                submitBtn.disabled = false;
+                submitBtn.style.backgroundColor = '';
+                btnText.innerText = 'إرسال التاسك ✅';
+              }
+            }, 800);
 
-          // Success feedback
-          tg?.HapticFeedback?.notificationOccurred('success');
-          
-          if (tg) {
-            tg.close();
-          } else {
-            alert('تم الإرسال بنجاح!');
-            form.reset();
+          } catch (error) {
+            console.error('Submission failed:', error);
+            tg?.HapticFeedback?.notificationOccurred('error');
+            alert('حدث خطأ أثناء الإرسال! يرجى التأكد من تشغيل الـ Workflow في n8n.');
+
+            // Reset UI for retry
             submitBtn.disabled = false;
             btnSpinner.style.display = 'none';
             btnText.innerText = 'إرسال التاسك ✅';
+            submitBtn.style.backgroundColor = '';
           }
+        };
 
-        } catch (err) {
-          clearTimeout(timeoutId);
-          console.error('Submission error:', err);
-
-          tg?.HapticFeedback?.notificationOccurred('error');
-          alert('حدث خطأ أثناء الإرسال! يرجى التأكد من الاتصال والمحاولة مرة أخرى.');
-
-          // Unlock UI
-          submitBtn.disabled = false;
-          btnSpinner.style.display = 'none';
-          btnText.innerText = 'إرسال التاسك ✅';
-        }
+        executeSubmission();
       });
     });
   </script>
