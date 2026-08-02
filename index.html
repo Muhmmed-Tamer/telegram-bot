@@ -204,18 +204,14 @@
       };
 
       try {
-        const response = await fetch(N8N_WEBHOOK_URL, {
+        await fetch(N8N_WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        if (response.ok) {
-          tg.HapticFeedback?.notificationOccurred('success');
-          tg.close();
-        } else {
-          throw new Error('Server error');
-        }
+        tg.HapticFeedback?.notificationOccurred('success');
+        tg.close();
       } catch (error) {
         tg.HapticFeedback?.notificationOccurred('error');
         alert('حدث خطأ أثناء الإرسال! يرجى المحاولة مرة أخرى.');
