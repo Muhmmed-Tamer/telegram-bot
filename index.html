@@ -2,8 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>إضافة تاسك جديد</title>
+  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
@@ -125,44 +126,44 @@
     <p>يرجى ملء الحقول التالية لإضافة التاسك للجداول</p>
   </div>
 
-  <form id="taskForm">
+  <form id="taskForm" autocomplete="off">
     <div class="form-group">
-      <label>Sales Name</label>
+      <label for="SalesName">Sales Name</label>
       <input type="text" id="SalesName" placeholder="أدخل اسم المبيعات" required>
     </div>
     
     <div class="form-group">
-      <label>Client Name</label>
+      <label for="ClientName">Client Name</label>
       <input type="text" id="ClientName" placeholder="أدخل اسم العميل" required>
     </div>
     
     <div class="form-group">
-      <label>Project Name</label>
+      <label for="ProjectName">Project Name</label>
       <input type="text" id="ProjectName" placeholder="اسم المشروع" required>
     </div>
     
     <div class="form-group">
-      <label>Visit Number</label>
+      <label for="VisitNumber">Visit Number</label>
       <input type="number" id="VisitNumber" placeholder="رقم الزيارة" required>
     </div>
     
     <div class="form-group">
-      <label>Reason For Visit</label>
+      <label for="ReasonForVisit">Reason For Visit</label>
       <input type="text" id="ReasonForVisit" placeholder="سبب الزيارة" required>
     </div>
     
     <div class="form-group">
-      <label>Channel</label>
+      <label for="Channel">Channel</label>
       <input type="text" id="Channel" placeholder="القناة" required>
     </div>
 
     <div class="form-group">
-      <label>Name</label>
+      <label for="Name">Name</label>
       <input type="text" id="Name" placeholder="الاسم" required>
     </div>
     
     <div class="form-group">
-      <label>Action</label>
+      <label for="Action">Action</label>
       <input type="text" id="Action" placeholder="الإجراء المطلوب" required>
     </div>
 
@@ -173,55 +174,85 @@
   </form>
 
   <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-
-    const N8N_WEBHOOK_URL = 'https://botelegram.app.n8n.cloud/webhook/add-task';
-
-    const form = document.getElementById('taskForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const btnSpinner = document.getElementById('btnSpinner');
-    const btnText = document.getElementById('btnText');
-
-    form.addEventListener('submit', async function(e) {
-      e.preventDefault();
-
-      submitBtn.disabled = true;
-      btnSpinner.style.display = 'inline-block';
-      btnText.innerText = 'جاري الإرسال...';
-
-      const payload = {
-        chat_id: tg.initDataUnsafe?.user?.id,
-        SalesName: document.getElementById('SalesName').value,
-        ClientName: document.getElementById('ClientName').value, 
-        ProjectName: document.getElementById('ProjectName').value,
-        VisitNumber: document.getElementById('VisitNumber').value,
-        ReasonForVisit: document.getElementById('ReasonForVisit').value,
-        Channel: document.getElementById('Channel').value,
-        Name: document.getElementById('Name').value,
-        Action: document.getElementById('Action').value
-      };
-
-      try {
-        await fetch(N8N_WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
-
-        tg.HapticFeedback?.notificationOccurred('success');
-        tg.close();
-      } catch (err) {
-        console.error(err);
-        tg.HapticFeedback?.notificationOccurred('error');
-        alert('حدث خطأ أثناء الإرسال!');
-        submitBtn.disabled = false;
-        btnSpinner.style.display = 'none';
-        btnText.innerText = 'إرسال التاسك ✅';
+    document.addEventListener('DOMContentLoaded', () => {
+      const tg = window.Telegram?.WebApp;
+      if (tg) {
+        tg.ready();
+        tg.expand();
       }
+
+      const N8N_WEBHOOK_URL = 'https://botelegram.app.n8n.cloud/webhook/add-task';
+
+      const form = document.getElementById('taskForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const btnSpinner = document.getElementById('btnSpinner');
+      const btnText = document.getElementById('btnText');
+
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Lock UI
+        submitBtn.disabled = true;
+        btnSpinner.style.display = 'inline-block';
+        btnText.innerText = 'جاري الإرسال...';
+
+        const payload = {
+          chat_id: tg?.initDataUnsafe?.user?.id || null,
+          SalesName: document.getElementById('SalesName').value.trim(),
+          ClientName: document.getElementById('ClientName').value.trim(), 
+          ProjectName: document.getElementById('ProjectName').value.trim(),
+          VisitNumber: document.getElementById('VisitNumber').value.trim(),
+          ReasonForVisit: document.getElementById('ReasonForVisit').value.trim(),
+          Channel: document.getElementById('Channel').value.trim(),
+          Name: document.getElementById('Name').value.trim(),
+          Action: document.getElementById('Action').value.trim()
+        };
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout safety
+
+        try {
+          const response = await fetch(N8N_WEBHOOK_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+
+          clearTimeout(timeoutId);
+
+          if (!response.ok) {
+            throw new Error(`Server returned status code ${response.status}`);
+          }
+
+          // Success feedback
+          tg?.HapticFeedback?.notificationOccurred('success');
+          
+          if (tg) {
+            tg.close();
+          } else {
+            alert('تم الإرسال بنجاح!');
+            form.reset();
+            submitBtn.disabled = false;
+            btnSpinner.style.display = 'none';
+            btnText.innerText = 'إرسال التاسك ✅';
+          }
+
+        } catch (err) {
+          clearTimeout(timeoutId);
+          console.error('Submission error:', err);
+
+          tg?.HapticFeedback?.notificationOccurred('error');
+          alert('حدث خطأ أثناء الإرسال! يرجى التأكد من الاتصال والمحاولة مرة أخرى.');
+
+          // Unlock UI
+          submitBtn.disabled = false;
+          btnSpinner.style.display = 'none';
+          btnText.innerText = 'إرسال التاسك ✅';
+        }
+      });
     });
   </script>
 </body>
