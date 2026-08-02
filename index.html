@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>إضافة تاسك جديد</title>
+  <title>إضافة مهمة جديدة</title>
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg-color: var(--tg-theme-bg-color, #ffffff);
-      --text-color: var(--tg-theme-text-color, #222222);
-      --hint-color: var(--tg-theme-hint-color, #999999);
+      --bg-color: var(--tg-theme-bg-color, #f4f4f7);
+      --text-color: var(--tg-theme-text-color, #1c1c1e);
+      --hint-color: var(--tg-theme-hint-color, #8e8e93);
       --button-color: var(--tg-theme-button-color, #2481cc);
       --button-text-color: var(--tg-theme-button-text-color, #ffffff);
-      --secondary-bg-color: var(--tg-theme-secondary-bg-color, #f4f4f5);
+      --secondary-bg-color: var(--tg-theme-secondary-bg-color, #ffffff);
+      --border-color: rgba(0, 0, 0, 0.08);
+      --accent-soft: rgba(36, 129, 204, 0.08);
     }
 
     * {
@@ -23,20 +25,39 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      padding: 16px;
+      padding: 16px 14px 90px 14px; /* Bottom padding for fixed MainButton */
       margin: 0;
       background-color: var(--bg-color);
       color: var(--text-color);
+      line-height: 1.4;
     }
 
+    /* --- Header Card --- */
     .header {
-      margin-bottom: 20px;
+      background: var(--secondary-bg-color);
+      border-radius: 16px;
+      padding: 18px 16px;
+      margin-bottom: 16px;
       text-align: center;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+
+    .header-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--accent-soft);
+      color: var(--button-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px auto;
     }
 
     .header h3 {
-      margin: 0 0 6px 0;
-      font-size: 20px;
+      margin: 0 0 4px 0;
+      font-size: 18px;
       font-weight: 700;
     }
 
@@ -46,155 +67,240 @@
       color: var(--hint-color);
     }
 
-    .form-group {
+    /* --- Form Section Cards --- */
+    .form-card {
+      background: var(--secondary-bg-color);
+      border-radius: 16px;
+      padding: 16px;
       margin-bottom: 14px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--button-color);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* --- Form Grid Systems --- */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
     }
 
     label {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       margin-bottom: 6px;
       font-size: 13px;
       font-weight: 600;
       color: var(--text-color);
     }
 
-    input {
+    label svg {
+      width: 15px;
+      height: 15px;
+      stroke: var(--hint-color);
+      stroke-width: 2;
+      fill: none;
+    }
+
+    input, select, textarea {
       width: 100%;
-      padding: 12px 14px;
-      font-size: 15px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 12px;
-      background-color: var(--secondary-bg-color);
+      padding: 11px 12px;
+      font-size: 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      background-color: var(--bg-color);
       color: var(--text-color);
       outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: all 0.2s ease;
+      font-family: inherit;
     }
 
     input:focus {
       border-color: var(--button-color);
-      box-shadow: 0 0 0 2px rgba(36, 129, 204, 0.2);
+      background-color: var(--secondary-bg-color);
+      box-shadow: 0 0 0 3px var(--accent-soft);
     }
 
-    button {
+    input::placeholder {
+      color: var(--hint-color);
+      opacity: 0.7;
+    }
+
+    /* --- Fallback Web Submit Button --- */
+    #fallbackSubmitBtn {
       width: 100%;
       padding: 14px;
       background-color: var(--button-color);
       color: var(--button-text-color);
       border: none;
       border-radius: 12px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 10px;
-      transition: opacity 0.2s ease, transform 0.1s ease;
+      margin-top: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      transition: background-color 0.2s ease;
     }
 
-    button:active {
-      transform: scale(0.98);
-    }
-
-    button:disabled {
+    #fallbackSubmitBtn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
-      transform: none;
-    }
-
-    .spinner {
-      display: none;
-      width: 18px;
-      height: 18px;
-      border: 2px solid var(--button-text-color);
-      border-top: 2px solid transparent;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
 
+  <!-- Header Header -->
   <div class="header">
-    <h3>📝 إضافة بيانات التاسك</h3>
-    <p>يرجى ملء الحقول التالية لإضافة التاسك للجداول</p>
+    <div class="header-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+      </svg>
+    </div>
+    <h3>إضافة مهمة جديدة</h3>
+    <p>أدخل بيانات الزيارة والمتابعة لحفظها تلقائياً</p>
   </div>
 
   <form id="taskForm" autocomplete="off">
-    <div class="form-group">
-      <label for="SalesName">Sales Name</label>
-      <input type="text" id="SalesName" placeholder="أدخل اسم المبيعات" required>
-    </div>
-    
-    <div class="form-group">
-      <label for="ClientName">Client Name</label>
-      <input type="text" id="ClientName" placeholder="أدخل اسم العميل" required>
-    </div>
-    
-    <div class="form-group">
-      <label for="ProjectName">Project Name</label>
-      <input type="text" id="ProjectName" placeholder="اسم المشروع" required>
-    </div>
-    
-    <div class="form-group">
-      <label for="VisitNumber">Visit Number</label>
-      <input type="number" id="VisitNumber" placeholder="رقم الزيارة" required>
-    </div>
-    
-    <div class="form-group">
-      <label for="ReasonForVisit">Reason For Visit</label>
-      <input type="text" id="ReasonForVisit" placeholder="سبب الزيارة" required>
-    </div>
-    
-    <div class="form-group">
-      <label for="Channel">Channel</label>
-      <input type="text" id="Channel" placeholder="القناة" required>
+
+    <!-- Card 1: Main Parties -->
+    <div class="form-card">
+      <div class="card-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        الأطراف الرئيسية
+      </div>
+      
+      <div class="form-group">
+        <label for="SalesName">
+          مسؤول المبيعات (Sales)
+        </label>
+        <input type="text" id="SalesName" placeholder="مثال: أحمد محمود" required>
+      </div>
+
+      <div class="form-group">
+        <label for="ClientName">
+          اسم العميل (Client)
+        </label>
+        <input type="text" id="ClientName" placeholder="مثال: شركة الأمل" required>
+      </div>
+
+      <div class="form-group">
+        <label for="ProjectName">
+          اسم المشروع (Project)
+        </label>
+        <input type="text" id="ProjectName" placeholder="مثال: كمبوند الصفوة" required>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label for="Name">Name</label>
-      <input type="text" id="Name" placeholder="الاسم" required>
-    </div>
-    
-    <div class="form-group">
-      <label for="Action">Action</label>
-      <input type="text" id="Action" placeholder="الإجراء المطلوب" required>
+    <!-- Card 2: Visit Specs (Grid) -->
+    <div class="form-card">
+      <div class="card-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        تفاصيل الاتصال والزيارة
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="VisitNumber">رقم الزيارة</label>
+          <input type="number" id="VisitNumber" placeholder="1" required>
+        </div>
+
+        <div class="form-group">
+          <label for="Channel">القناة (Channel)</label>
+          <input type="text" id="Channel" placeholder="واتساب / زيارة" required>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: 10px;">
+        <label for="ReasonForVisit">سبب الزيارة</label>
+        <input type="text" id="ReasonForVisit" placeholder="مثال: تقديم عرض أسعار" required>
+      </div>
     </div>
 
-    <button type="submit" id="submitBtn">
-      <span class="spinner" id="btnSpinner"></span>
-      <span id="btnText">إرسال التاسك ✅</span>
+    <!-- Card 3: Contact & Required Action -->
+    <div class="form-card">
+      <div class="card-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        المتابعة والإجراء المطلوب
+      </div>
+
+      <div class="form-group">
+        <label for="Name">اسم جهة التواصل</label>
+        <input type="text" id="Name" placeholder="مثال: م. محمد إبراهيم" required>
+      </div>
+
+      <div class="form-group">
+        <label for="Action">الإجراء المطلوب (Action)</label>
+        <input type="text" id="Action" placeholder="مثال: إرسال العقد للتوقيع" required>
+      </div>
+    </div>
+
+    <!-- Fallback submit button for browser testing -->
+    <button type="submit" id="fallbackSubmitBtn">
+      <span>تسجيل البيانات ✅</span>
     </button>
   </form>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const tg = window.Telegram?.WebApp;
-      if (tg) {
-        tg.ready();
-        tg.expand();
-      }
-
       const N8N_WEBHOOK_URL = 'https://botelegram.app.n8n.cloud/webhook/add-task';
 
       const form = document.getElementById('taskForm');
-      const submitBtn = document.getElementById('submitBtn');
-      const btnSpinner = document.getElementById('btnSpinner');
-      const btnText = document.getElementById('btnText');
+      const fallbackBtn = document.getElementById('fallbackSubmitBtn');
+
+      if (tg) {
+        tg.ready();
+        tg.expand();
+
+        // Use native Telegram MainButton for mobile UX
+        tg.MainButton.setText('تسجيل التاسك ✅');
+        tg.MainButton.show();
+        tg.MainButton.onClick(() => form.requestSubmit());
+        
+        // Hide standard HTML button inside Telegram WebApp container
+        fallbackBtn.style.display = 'none';
+      }
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // Prevent double submission UI state
-        submitBtn.disabled = true;
-        btnSpinner.style.display = 'inline-block';
-        btnText.innerText = 'جاري الإرسال...';
+        // Lock UI States
+        if (tg) {
+          tg.MainButton.showProgress();
+          tg.MainButton.disable();
+        } else {
+          fallbackBtn.disabled = true;
+          fallbackBtn.innerText = 'جاري الإرسال...';
+        }
 
         const payload = {
           chat_id: tg?.initDataUnsafe?.user?.id || null,
@@ -208,52 +314,48 @@
           Action: document.getElementById('Action').value.trim()
         };
 
-        const executeSubmission = async () => {
-          try {
-            // Using standard fetch with keepalive to prevent lifecycle cancellation on window close
-            const res = await fetch(N8N_WEBHOOK_URL, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload),
-              keepalive: true
-            });
+        try {
+          const res = await fetch(N8N_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            keepalive: true
+          });
 
-            if (!res.ok) {
-              throw new Error(`HTTP Error: ${res.status}`);
-            }
-
-            // Success feedback
-            tg?.HapticFeedback?.notificationOccurred('success');
-            btnSpinner.style.display = 'none';
-            btnText.innerText = 'تم الإرسال بنجاح! ✅';
-            submitBtn.style.backgroundColor = '#2ecc71';
-
-            // Brief delay to allow feedback animation before closing window
-            setTimeout(() => {
-              if (tg) {
-                tg.close();
-              } else {
-                form.reset();
-                submitBtn.disabled = false;
-                submitBtn.style.backgroundColor = '';
-                btnText.innerText = 'إرسال التاسك ✅';
-              }
-            }, 800);
-
-          } catch (error) {
-            console.error('Submission failed:', error);
-            tg?.HapticFeedback?.notificationOccurred('error');
-            alert('حدث خطأ أثناء الإرسال! يرجى التأكد من تشغيل الـ Workflow في n8n.');
-
-            // Reset UI for retry
-            submitBtn.disabled = false;
-            btnSpinner.style.display = 'none';
-            btnText.innerText = 'إرسال التاسك ✅';
-            submitBtn.style.backgroundColor = '';
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
           }
-        };
 
-        executeSubmission();
+          // Native Haptic Feedback & Hiding Progress
+          tg?.HapticFeedback?.notificationOccurred('success');
+
+          if (tg) {
+            tg.MainButton.hideProgress();
+            tg.MainButton.setText('تم التسجيل بنجاح! 🎉');
+            tg.MainButton.setParams({ color: '#2ecc71' });
+
+            setTimeout(() => tg.close(), 600);
+          } else {
+            alert('تم تسجيل المهمة بنجاح!');
+            form.reset();
+            fallbackBtn.disabled = false;
+            fallbackBtn.innerText = 'تسجيل البيانات ✅';
+          }
+
+        } catch (error) {
+          console.error('Submission Error:', error);
+          tg?.HapticFeedback?.notificationOccurred('error');
+          alert('حدث خطأ أثناء الاتصال! يرجى التأكد من الـ Webhook ثم المحاولة.');
+
+          if (tg) {
+            tg.MainButton.hideProgress();
+            tg.MainButton.enable();
+            tg.MainButton.setText('إعادة المحاولة 🔄');
+          } else {
+            fallbackBtn.disabled = false;
+            fallbackBtn.innerText = 'تسجيل البيانات ✅';
+          }
+        }
       });
     });
   </script>
