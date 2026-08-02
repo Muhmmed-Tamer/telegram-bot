@@ -133,7 +133,7 @@
     
     <div class="form-group">
       <label>Client Name</label>
-      <input type="text" id="ClienName" placeholder="أدخل اسم العميل" required>
+      <input type="text" id="ClientName" placeholder="أدخل اسم العميل" required>
     </div>
     
     <div class="form-group">
@@ -177,7 +177,7 @@
     tg.ready();
     tg.expand();
 
-    const N8N_WEBHOOK_URL = 'https://botelegram.app.n8n.cloud/webhook-test/add-task';
+    const N8N_WEBHOOK_URL = 'https://botelegram.app.n8n.cloud/webhook/add-task';
 
     const form = document.getElementById('taskForm');
     const submitBtn = document.getElementById('submitBtn');
@@ -191,11 +191,10 @@
       btnSpinner.style.display = 'inline-block';
       btnText.innerText = 'جاري الإرسال...';
 
-      // مفاتيح الـ JSON هي نفسها بالضبط أسماء رؤوس الأعمدة في Google Sheets
       const payload = {
         chat_id: tg.initDataUnsafe?.user?.id,
         SalesName: document.getElementById('SalesName').value,
-        ClienName: document.getElementById('ClientName').value,
+        ClientName: document.getElementById('ClientName').value, 
         ProjectName: document.getElementById('ProjectName').value,
         VisitNumber: document.getElementById('VisitNumber').value,
         ReasonForVisit: document.getElementById('ReasonForVisit').value,
