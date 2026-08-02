@@ -2,40 +2,193 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>إضافة تاسك جديد</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 15px; background-color: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); }
-    .form-group { margin-bottom: 12px; }
-    label { display: block; margin-bottom: 4px; font-weight: bold; }
-    input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 8px; }
-    button { width: 100%; padding: 12px; background-color: var(--tg-theme-button-color, #2481cc); color: var(--tg-theme-button-text-color, #fff); border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+    :root {
+      --bg-color: var(--tg-theme-bg-color, #ffffff);
+      --text-color: var(--tg-theme-text-color, #222222);
+      --hint-color: var(--tg-theme-hint-color, #999999);
+      --button-color: var(--tg-theme-button-color, #2481cc);
+      --button-text-color: var(--tg-theme-button-text-color, #ffffff);
+      --secondary-bg-color: var(--tg-theme-secondary-bg-color, #f4f4f5);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      padding: 16px;
+      margin: 0;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    .header {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .header h3 {
+      margin: 0 0 6px 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .header p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--hint-color);
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 15px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      background-color: var(--secondary-bg-color);
+      color: var(--text-color);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input:focus {
+      border-color: var(--button-color);
+      box-shadow: 0 0 0 2px rgba(36, 129, 204, 0.2);
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--button-color);
+      color: var(--button-text-color);
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: opacity 0.2s ease, transform 0.1s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Spinner Animation */
+    .spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--button-text-color);
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
-  <h3>📝 إضافة بيانات التاسك</h3>
+
+  <div class="header">
+    <h3>📝 إضافة بيانات التاسك</h3>
+    <p>يرجى ملء الحقول التالية لإضافة التاسك للجداول</p>
+  </div>
+
   <form id="taskForm">
-    <div class="form-group"><label>Sales Name:</label><input type="text" id="sales_name" required></div>
-    <div class="form-group"><label>Client Name:</label><input type="text" id="client_name" required></div>
-    <div class="form-group"><label>Project Name:</label><input type="text" id="project_name" required></div>
-    <div class="form-group"><label>Visit Number:</label><input type="number" id="visit_number" required></div>
-    <div class="form-group"><label>Reason for Visit:</label><input type="text" id="reason" required></div>
-    <div class="form-group"><label>Channel & Name:</label><input type="text" id="channel" required></div>
-    <div class="form-group"><label>Action:</label><input type="text" id="action" required></div>
+    <div class="form-group">
+      <label>Sales Name</label>
+      <input type="text" id="sales_name" placeholder="أدخل اسم المبيعات" required>
+    </div>
     
-    <button type="submit">إرسال التاسك ✅</button>
+    <div class="form-group">
+      <label>Client Name</label>
+      <input type="text" id="client_name" placeholder="أدخل اسم العميل" required>
+    </div>
+    
+    <div class="form-group">
+      <label>Project Name</label>
+      <input type="text" id="project_name" placeholder="اسم المشروع" required>
+    </div>
+    
+    <div class="form-group">
+      <label>Visit Number</label>
+      <input type="number" id="visit_number" placeholder="رقم الزيارة" required>
+    </div>
+    
+    <div class="form-group">
+      <label>Reason for Visit</label>
+      <input type="text" id="reason" placeholder="سبب الزيارة" required>
+    </div>
+    
+    <div class="form-group">
+      <label>Channel & Name</label>
+      <input type="text" id="channel" placeholder="القناة والاسم" required>
+    </div>
+    
+    <div class="form-group">
+      <label>Action</label>
+      <input type="text" id="action" placeholder="الإجراء المطلوب" required>
+    </div>
+
+    <button type="submit" id="submitBtn">
+      <span class="spinner" id="btnSpinner"></span>
+      <span id="btnText">إرسال التاسك ✅</span>
+    </button>
   </form>
 
   <script>
     const tg = window.Telegram.WebApp;
-    tg.expand(); 
-    
-    const N8N_WEBHOOK_URL = 'https://botelegram.app.n8n.cloud/webhook-test/add-task';
+    tg.ready();
+    tg.expand();
 
-    document.getElementById('taskForm').addEventListener('submit', async function(e) {
+    // رابط الـ Production الخاص بك
+    const N8N_WEBHOOK_URL = 'https://botelegram.app.n8n.cloud/webhook/add-task';
+
+    const form = document.getElementById('taskForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const btnText = document.getElementById('btnText');
+
+    form.addEventListener('submit', async function(e) {
       e.preventDefault();
-      
+
+      // 1. منع الإرسال المتكرر وتعطيل الزر
+      submitBtn.disabled = true;
+      btnSpinner.style.display = 'inline-block';
+      btnText.innerText = 'جاري الإرسال...';
+
       const payload = {
         chat_id: tg.initDataUnsafe?.user?.id,
         sales_name: document.getElementById('sales_name').value,
@@ -47,14 +200,30 @@
         action: document.getElementById('action').value
       };
 
-      await fetch(N8N_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      try {
+        // 2. إرسال البيانات لـ n8n
+        const response = await fetch(N8N_WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
 
-      tg.sendData(JSON.stringify(payload));
-      tg.close();
+        if (response.ok) {
+          // إشعار نجاح أصلي داخل تليجرام وإغلاق الواجهة
+          tg.HapticFeedback?.notificationOccurred('success');
+          tg.close();
+        } else {
+          throw new Error('Server error');
+        }
+      } catch (error) {
+        // إعادة التفعيل في حالة حدوث مشكلة شبكة
+        tg.HapticFeedback?.notificationOccurred('error');
+        alert('حدث خطأ أثناء الإرسال! يرجى المحاولة مرة أخرى.');
+        
+        submitBtn.disabled = false;
+        btnSpinner.style.display = 'none';
+        btnText.innerText = 'إرسال التاسك ✅';
+      }
     });
   </script>
 </body>
